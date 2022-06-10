@@ -17,44 +17,40 @@ class SolutionTest extends Solution {
 
     @Test
     void raceInfoInitTest() {
-
-    }
-
-//    @Test
-    void rat() {
-        Gson gson = new Gson();
-        RaceInfo raceInfo = new RaceInfo();
+        RaceInfo correctRaceInfo = new RaceInfo();
         final String SWAMP = "SWAMP";
         final String WATER = "WATER";
         final String FOREST = "FOREST";
         final String PLAIN = "PLAIN";
 
-        raceInfo.getDecodeMap().put('S', SWAMP);
-        raceInfo.getDecodeMap().put('W', WATER);
-        raceInfo.getDecodeMap().put('T', FOREST);
-        raceInfo.getDecodeMap().put('P', PLAIN);
+        correctRaceInfo.getDecodeMap().put('S', SWAMP);
+        correctRaceInfo.getDecodeMap().put('W', WATER);
+        correctRaceInfo.getDecodeMap().put('T', FOREST);
+        correctRaceInfo.getDecodeMap().put('P', PLAIN);
 
-        raceInfo.getCostMap().put("HUMAN", new HashMap<>());
-        raceInfo.getCostMap().put("SWAMPER", new HashMap<>());
-        raceInfo.getCostMap().put("FORESTER", new HashMap<>());
+        correctRaceInfo.getCostMap().put("HUMAN", new HashMap<>());
+        correctRaceInfo.getCostMap().put("SWAMPER", new HashMap<>());
+        correctRaceInfo.getCostMap().put("FORESTER", new HashMap<>());
 
-        var human = raceInfo.getCostMap().get("HUMAN");
+        var human = correctRaceInfo.getCostMap().get("HUMAN");
         human.put(SWAMP, 5);
         human.put(WATER, 2);
         human.put(FOREST, 3);
         human.put(PLAIN, 1);
 
-        var swamper = raceInfo.getCostMap().get("SWAMPER");
+        var swamper = correctRaceInfo.getCostMap().get("SWAMPER");
         swamper.put(SWAMP, 2);
         swamper.put(WATER, 2);
         swamper.put(FOREST, 5);
         swamper.put(PLAIN, 2);
 
-        var forester = raceInfo.getCostMap().get("FORESTER");
+        var forester = correctRaceInfo.getCostMap().get("FORESTER");
         forester.put(SWAMP, 3);
         forester.put(WATER, 3);
         forester.put(FOREST, 2);
         forester.put(PLAIN, 2);
-        System.out.println(gson.toJson(raceInfo));
+
+        Assertions.assertEquals(correctRaceInfo.getCostMap(), raceInfo.getCostMap());
+        Assertions.assertEquals(correctRaceInfo.getDecodeMap(), raceInfo.getDecodeMap());
     }
 }
