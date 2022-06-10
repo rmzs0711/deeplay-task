@@ -46,6 +46,9 @@ public class Solution {
         return negativeCostsExist;
     }
 
+    /*
+       Если нужны отрицательные ребра, выполните setNegative(true);
+     */
     public static void setNegative(boolean areNegativeCostsExist) {
         Solution.negativeCostsExist = areNegativeCostsExist;
     }
@@ -91,7 +94,7 @@ public class Solution {
         sortedSet.add(start);
         while (!sortedSet.isEmpty()) {
             var nearest = sortedSet.pollFirst();
-            relax(nearest, dist, sortedSet);
+            relaxDijkstra(nearest, dist, sortedSet);
         }
         return dist[TaskConstants.LEVEL_HEIGHT - 1][TaskConstants.LEVEL_WIDTH - 1];
     }
@@ -141,7 +144,7 @@ public class Solution {
         return neighbors;
     }
 
-    private static void relax(GraphNode nearest, int[][] dist, TreeSet<GraphNode> sortedSet) {
+    private static void relaxDijkstra(GraphNode nearest, int[][] dist, TreeSet<GraphNode> sortedSet) {
         int[][] neighbors = calcNeighbors(nearest);
 
         for (var neighbor : neighbors) {
