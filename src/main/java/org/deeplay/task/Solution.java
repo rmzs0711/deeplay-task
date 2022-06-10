@@ -1,28 +1,26 @@
 package org.deeplay.task;
 
 import com.google.gson.Gson;
-import org.w3c.dom.Node;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.TreeSet;
 
 public class Solution {
-    private static Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
-    private static RaceInfo raceInfo;
+    protected static RaceInfo raceInfo;
 
-    private static String currentRace = null;
-    private static final NodeComparator comparator = new NodeComparator();
+    protected static final String currentRace = null;
+    protected static final NodeComparator comparator = new NodeComparator();
 
-    private static final int[][] level = new int[TaskConstants.LEVEL_HEIGHT][TaskConstants.LEVEL_WIDTH];
+    protected static final int[][] level = new int[TaskConstants.LEVEL_HEIGHT][TaskConstants.LEVEL_WIDTH];
 
     static public void setRaceInfo(String pathfile) throws IOException {
         try (var jsonReader = gson.newJsonReader(new FileReader(pathfile))) {
-            raceInfo = gson.fromJson(jsonReader, raceInfo.getClass());
+            raceInfo = gson.fromJson(jsonReader, RaceInfo.class);
         }
     }
 
@@ -73,7 +71,7 @@ public class Solution {
             var nearest = sortedSet.pollFirst();
             relax(nearest, dist, sortedSet);
         }
-        return;
+        return dist[TaskConstants.LEVEL_HEIGHT - 1][TaskConstants.LEVEL_WIDTH - 1];
     }
 
     private static void relax(GraphNode nearest, int[][] dist, TreeSet<GraphNode> sortedSet) {

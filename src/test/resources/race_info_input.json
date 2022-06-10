@@ -1,0 +1,28 @@
+{
+  "costMap": {
+    "HUMAN": {
+      "PLAIN": 1,
+      "SWAMP": 5,
+      "WATER": 2,
+      "FOREST": 3
+    },
+    "FORESTER": {
+      "PLAIN": 2,
+      "SWAMP": 3,
+      "WATER": 3,
+      "FOREST": 2
+    },
+    "SWAMPER": {
+      "PLAIN": 2,
+      "SWAMP": 2,
+      "WATER": 2,
+      "FOREST": 5
+    }
+  },
+  "decodeMap": {
+    "P": "PLAIN",
+    "S": "SWAMP",
+    "T": "FOREST",
+    "W": "WATER"
+  }
+}
