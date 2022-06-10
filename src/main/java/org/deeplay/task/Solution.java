@@ -20,39 +20,6 @@ public class Solution {
 
     protected static final int[][] level = new int[TaskConstants.LEVEL_HEIGHT][TaskConstants.LEVEL_WIDTH];
 
-    static public void setRaceInfo(String pathfile) throws IOException {
-        try (var jsonReader = gson.newJsonReader(new FileReader(pathfile))) {
-            raceInfo = gson.fromJson(jsonReader, RaceInfo.class);
-        }
-    }
-
-    static public int getResult(String levelDescription, String race) throws NegativeCycleException {
-        currentRace = race;
-        parseLevelDescription(levelDescription);
-
-        int[][] dist = new int[TaskConstants.LEVEL_HEIGHT][TaskConstants.LEVEL_WIDTH];
-        Arrays.stream(dist).forEach(array -> Arrays.fill(array, Integer.MAX_VALUE));
-        dist[0][0] = 0;
-        var start = new GraphNode(0, 0);
-        start.d = 0;
-        if (negativeCostsExist) {
-            return findShortestPathFordBellman(start, dist);
-        } else {
-            return findShortestPathDijkstra(start, dist);
-        }
-    }
-
-    public static boolean isNegative() {
-        return negativeCostsExist;
-    }
-
-    /*
-       Если нужны отрицательные ребра, выполните setNegative(true);
-     */
-    public static void setNegative(boolean areNegativeCostsExist) {
-        Solution.negativeCostsExist = areNegativeCostsExist;
-    }
-
     protected static class GraphNode {
         private int d = Integer.MAX_VALUE;
         private final int x;
@@ -86,6 +53,50 @@ public class Solution {
                 return first.y - second.y;
             }
             return first.d - second.d;
+        }
+    }
+
+
+    /*
+       Если нужны отрицательные ребра, выполните setNegative(true);
+     */
+    public static void setNegative(boolean areNegativeCostsExist) {
+        Solution.negativeCostsExist = areNegativeCostsExist;
+    }
+
+    public static boolean isNegative() {
+        return negativeCostsExist;
+    }
+
+    static public void setRaceInfo(String pathfile) throws IOException {
+        try (var jsonReader = gson.newJsonReader(new FileReader(pathfile))) {
+            raceInfo = gson.fromJson(jsonReader, RaceInfo.class);
+        }
+    }
+
+    static public int getResult(String levelDescription, String race) throws NegativeCycleException {
+        currentRace = race;
+        parseLevelDescription(levelDescription);
+
+        int[][] dist = new int[TaskConstants.LEVEL_HEIGHT][TaskConstants.LEVEL_WIDTH];
+        Arrays.stream(dist).forEach(array -> Arrays.fill(array, Integer.MAX_VALUE));
+        dist[0][0] = 0;
+        var start = new GraphNode(0, 0);
+        start.d = 0;
+        if (negativeCostsExist) {
+            return findShortestPathFordBellman(start, dist);
+        } else {
+            return findShortestPathDijkstra(start, dist);
+        }
+    }
+
+    protected static void parseLevelDescription(String levelDescription) {
+        int index = 0;
+        for (var c : levelDescription.toCharArray()) {
+            String place = raceInfo.getDecodeMap().get(c);
+            level[index / TaskConstants.LEVEL_HEIGHT][index % TaskConstants.LEVEL_WIDTH] =
+                    raceInfo.getCostMap().get(currentRace).get(place);
+            index++;
         }
     }
 
@@ -169,16 +180,6 @@ public class Solution {
 
     private static boolean notInBounds(int pos, int max) {
         return pos < 0 || pos >= max;
-    }
-
-    protected static void parseLevelDescription(String levelDescription) {
-        int index = 0;
-        for (var c : levelDescription.toCharArray()) {
-            String place = raceInfo.getDecodeMap().get(c);
-            level[index / TaskConstants.LEVEL_HEIGHT][index % TaskConstants.LEVEL_WIDTH] =
-                    raceInfo.getCostMap().get(currentRace).get(place);
-            index++;
-        }
     }
 
     // так как статическая функция и хочется иметь способ все почистить
