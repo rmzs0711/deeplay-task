@@ -6,12 +6,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.TreeSet;
 
 public class Solution {
+    private static boolean negativeCostsExist;
     private static final Gson gson = new Gson();
 
-    protected static RaceInfo raceInfo; // Тут и дальше я заменил private на protected для удобства доступа в тестировании
+    protected static RaceInfo raceInfo = null; // Тут и дальше я заменил private на protected для удобства доступа в тестировании
 
     protected static String currentRace = null;
     protected static final NodeComparator comparator = new NodeComparator();
@@ -24,10 +26,28 @@ public class Solution {
         }
     }
 
-    static public int getResult(String levelDescription, String race) {
+    static public int getResult(String levelDescription, String race) throws NegativeCycleException {
         currentRace = race;
         parseLevelDescription(levelDescription);
-        return findShortestPathDijkstra();
+
+        int[][] dist = new int[TaskConstants.LEVEL_HEIGHT][TaskConstants.LEVEL_WIDTH];
+        Arrays.stream(dist).forEach(array -> Arrays.fill(array, Integer.MAX_VALUE));
+        dist[0][0] = 0;
+        var start = new GraphNode(0, 0);
+        start.d = 0;
+        if (negativeCostsExist) {
+            return findShortestPathFordBellman(start, dist);
+        } else {
+            return findShortestPathDijkstra(start, dist);
+        }
+    }
+
+    public static boolean isNegative() {
+        return negativeCostsExist;
+    }
+
+    public static void setNegative(boolean areNegativeCostsExist) {
+        Solution.negativeCostsExist = areNegativeCostsExist;
     }
 
     protected static class GraphNode {
@@ -66,13 +86,8 @@ public class Solution {
         }
     }
 
-    private static int findShortestPathDijkstra() {
-        int[][] dist = new int[TaskConstants.LEVEL_HEIGHT][TaskConstants.LEVEL_WIDTH];
-        Arrays.stream(dist).forEach(array -> Arrays.fill(array, Integer.MAX_VALUE));
-        dist[0][0] = 0;
+    private static int findShortestPathDijkstra(GraphNode start, int[][] dist) {
         TreeSet<GraphNode> sortedSet = new TreeSet<>(comparator);
-        var start = new GraphNode(0, 0);
-        start.d = 0;
         sortedSet.add(start);
         while (!sortedSet.isEmpty()) {
             var nearest = sortedSet.pollFirst();
@@ -81,25 +96,59 @@ public class Solution {
         return dist[TaskConstants.LEVEL_HEIGHT - 1][TaskConstants.LEVEL_WIDTH - 1];
     }
 
-    private static void relax(GraphNode nearest, int[][] dist, TreeSet<GraphNode> sortedSet) {
-        int[][] destinations = new int[2 * TaskConstants.LEVEL_DIMENSION][];
+    private static int findShortestPathFordBellman(GraphNode start, int[][]dist) throws NegativeCycleException {
+        LinkedList<GraphNode> queue = new LinkedList<>();
+        queue.add(start);
+        boolean[][] inQueue = new boolean[TaskConstants.LEVEL_HEIGHT][TaskConstants.LEVEL_WIDTH];
+        inQueue[start.y][start.x] = true;
+        int stepsCounter = 0;
+        while (!queue.isEmpty()) {
+            var node = queue.pollFirst();
+            inQueue[node.y][node.x] = false;
+            var neighbors = calcNeighbors(node);
+            for (var neighbor : neighbors) {
+                if (neighbor == null) {
+                    continue;
+                }
+                var oldNode = new GraphNode(neighbor[1], neighbor[0]);
+                if (dist[node.y][node.x] + level[oldNode.y][oldNode.x] < dist[oldNode.y][oldNode.x]) {
+                    if (stepsCounter > TaskConstants.LEVEL_WIDTH * TaskConstants.LEVEL_HEIGHT) {
+                        throw new NegativeCycleException();
+                    }
+                    dist[oldNode.y][oldNode.x] = dist[node.y][node.x] + level[oldNode.y][oldNode.x];
+                    if (!inQueue[oldNode.y][oldNode.x]) {
+                        inQueue[oldNode.y][oldNode.x] = true;
+                        queue.add(oldNode);
+                    }
+                }
+            }
+            stepsCounter++;
+        }
+        return dist[TaskConstants.LEVEL_HEIGHT - 1][TaskConstants.LEVEL_WIDTH - 1];
+    }
 
+    protected static int[][] calcNeighbors(GraphNode start) {
+        int[][] neighbors = new int[2 * TaskConstants.LEVEL_DIMENSION][];
         for (int i = 0; i < TaskConstants.edges.length; i++) {
             var edge = TaskConstants.edges[i];
-            var newY = edge[0] + nearest.y;
-            var newX = edge[1] + nearest.x;
+            var newY = edge[0] + start.y;
+            var newX = edge[1] + start.x;
             if (notInBounds(newX, TaskConstants.LEVEL_WIDTH) || notInBounds(newY, TaskConstants.LEVEL_HEIGHT)) {
                 continue;
             }
-            destinations[i] = new int[]{newY, newX};
+            neighbors[i] = new int[]{newY, newX};
         }
+        return neighbors;
+    }
 
+    private static void relax(GraphNode nearest, int[][] dist, TreeSet<GraphNode> sortedSet) {
+        int[][] neighbors = calcNeighbors(nearest);
 
-        for (var dest : destinations) {
-            if (dest == null) {
+        for (var neighbor : neighbors) {
+            if (neighbor == null) {
                 continue;
             }
-            var destNode = new GraphNode(dest[1], dest[0]);
+            var destNode = new GraphNode(neighbor[1], neighbor[0]);
             destNode.d = Integer.min(
                     nearest.d + level[destNode.y][destNode.x], dist[destNode.y][destNode.x]);
 
@@ -127,5 +176,13 @@ public class Solution {
                     raceInfo.getCostMap().get(currentRace).get(place);
             index++;
         }
+    }
+
+    // так как статическая функция и хочется иметь способ все почистить
+    protected void clear() {
+        currentRace = null;
+        raceInfo = null;
+        negativeCostsExist = false;
+        Arrays.stream(level).forEach(array -> Arrays.fill(array, 0));
     }
 }

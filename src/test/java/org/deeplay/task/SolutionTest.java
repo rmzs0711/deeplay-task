@@ -6,9 +6,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 class SolutionTest extends Solution {
     private static final String raceInfoInput = "src/test/resources/race_info_input.json";
     private static final String lvl1 = "STWSWTPPTPTTPWPP";
+
     @BeforeAll
     static void setUp() {
         Assertions.assertDoesNotThrow(() -> Solution.setRaceInfo(raceInfoInput));
@@ -94,20 +97,35 @@ class SolutionTest extends Solution {
     }
 
     @Test
-    void solutionTest1() {
-        Assertions.assertEquals(10, Solution.getResult(lvl1, "Human"));
-        Assertions.assertEquals(12, Solution.getResult(lvl1, "Woodman"));
-        Assertions.assertEquals(15, Solution.getResult(lvl1, "Swamper"));
+    void dijkstraSolutionTest1() {
+        setNegative(false);
+        try {
+            Assertions.assertEquals(10, Solution.getResult(lvl1, "Human"));
+            Assertions.assertEquals(12, Solution.getResult(lvl1, "Woodman"));
+            Assertions.assertEquals(15, Solution.getResult(lvl1, "Swamper"));
 
-        Assertions.assertEquals(6, Solution.getResult("PPPPPPPPPPPPPPPP", "Human"));
-        Assertions.assertEquals(30, Solution.getResult("SSSSSSSSSSSSSSSS", "Human"));
+            Assertions.assertEquals(6, Solution.getResult("PPPPPPPPPPPPPPPP", "Human"));
+            Assertions.assertEquals(30, Solution.getResult("SSSSSSSSSSSSSSSS", "Human"));
 
-        Assertions.assertEquals(10, Solution.getResult("SSPPSPPPPPPPPPPP", "Human"));
+            Assertions.assertEquals(10, Solution.getResult("SSPPSPPPPPPPPPPP", "Human"));
+        } catch (NegativeCycleException exception) {
+            fail();
+        }
     }
 
+    @Test
+    void fordBellmanSolutionTest1() {
+        setNegative(true);
+        dijkstraSolutionTest1();
+
+    }
 
     @Test
     void solutionStressTest() {
-
+        /*
+            Можно написать алгоритм флойда, и затем по нему проверять
+            ответы из разных точек на карте друг в друга,
+            но к нему затем бы тоже написать тесты на корректность...
+        */
     }
 }
