@@ -1,18 +1,18 @@
 {
   "costMap": {
-    "HUMAN": {
+    "Human": {
       "PLAIN": 1,
       "SWAMP": 5,
       "WATER": 2,
       "FOREST": 3
     },
-    "FORESTER": {
+    "Woodman": {
       "PLAIN": 2,
       "SWAMP": 3,
       "WATER": 3,
       "FOREST": 2
     },
-    "SWAMPER": {
+    "Swamper": {
       "PLAIN": 2,
       "SWAMP": 2,
       "WATER": 2,

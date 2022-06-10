@@ -11,7 +11,7 @@ import java.util.TreeSet;
 public class Solution {
     private static final Gson gson = new Gson();
 
-    protected static RaceInfo raceInfo;
+    protected static RaceInfo raceInfo; // Тут и дальше я заменил private на protected для удобства доступа в тестировании
 
     protected static String currentRace = null;
     protected static final NodeComparator comparator = new NodeComparator();
@@ -30,14 +30,18 @@ public class Solution {
         return findShortestPathDijkstra();
     }
 
-    private static class GraphNode {
+    protected static class GraphNode {
         private int d = Integer.MAX_VALUE;
         private final int x;
         private final int y;
 
-        private GraphNode(int x, int y) {
+        protected GraphNode(int x, int y) {
             this.x = x;
             this.y = y;
+        }
+
+        public void setD(int d) {
+            this.d = d;
         }
 
         public int getX() {
@@ -49,7 +53,7 @@ public class Solution {
         }
     }
 
-    private static class NodeComparator implements Comparator<GraphNode> {
+    protected static class NodeComparator implements Comparator<GraphNode> {
         @Override
         public int compare(GraphNode first, GraphNode second) {
             if (first.d == second.d) {
@@ -115,7 +119,7 @@ public class Solution {
         return pos < 0 || pos >= max;
     }
 
-    private static void parseLevelDescription(String levelDescription) {
+    protected static void parseLevelDescription(String levelDescription) {
         int index = 0;
         for (var c : levelDescription.toCharArray()) {
             String place = raceInfo.getDecodeMap().get(c);
