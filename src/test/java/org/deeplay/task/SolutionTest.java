@@ -53,4 +53,9 @@ class SolutionTest extends Solution {
         Assertions.assertEquals(correctRaceInfo.getCostMap(), raceInfo.getCostMap());
         Assertions.assertEquals(correctRaceInfo.getDecodeMap(), raceInfo.getDecodeMap());
     }
+
+    @Test
+    void runTest1() {
+        System.out.println(Solution.getResult("STWSWTPPTPTTPWPP", "HUMAN"));
+    }
 }

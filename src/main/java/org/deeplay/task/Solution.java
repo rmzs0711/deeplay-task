@@ -13,7 +13,7 @@ public class Solution {
 
     protected static RaceInfo raceInfo;
 
-    protected static final String currentRace = null;
+    protected static String currentRace = null;
     protected static final NodeComparator comparator = new NodeComparator();
 
     protected static final int[][] level = new int[TaskConstants.LEVEL_HEIGHT][TaskConstants.LEVEL_WIDTH];
@@ -25,6 +25,7 @@ public class Solution {
     }
 
     static public int getResult(String levelDescription, String race) {
+        currentRace = race;
         parseLevelDescription(levelDescription);
         return findShortestPathDijkstra();
     }
@@ -66,7 +67,9 @@ public class Solution {
         Arrays.stream(dist).forEach(array -> Arrays.fill(array, Integer.MAX_VALUE));
         dist[0][0] = 0;
         TreeSet<GraphNode> sortedSet = new TreeSet<>(comparator);
-        sortedSet.add(new GraphNode(0, 0));
+        var start = new GraphNode(0, 0);
+        start.d = 0;
+        sortedSet.add(start);
         while (!sortedSet.isEmpty()) {
             var nearest = sortedSet.pollFirst();
             relax(nearest, dist, sortedSet);
@@ -79,12 +82,22 @@ public class Solution {
 
         for (int i = 0; i < TaskConstants.edges.length; i++) {
             var edge = TaskConstants.edges[i];
-            destinations[i] = new int[]{edge[0] + nearest.y, edge[1] + nearest.x};
+            var newY = edge[0] + nearest.y;
+            var newX = edge[1] + nearest.x;
+            if (notInBounds(newX, TaskConstants.LEVEL_WIDTH) || notInBounds(newY, TaskConstants.LEVEL_HEIGHT)) {
+                continue;
+            }
+            destinations[i] = new int[]{newY, newX};
         }
 
+
         for (var dest : destinations) {
+            if (dest == null) {
+                continue;
+            }
             var destNode = new GraphNode(dest[1], dest[0]);
-            destNode.d = nearest.d + level[destNode.y][destNode.x];
+            destNode.d = Integer.min(
+                    nearest.d + level[destNode.y][destNode.x], dist[destNode.y][destNode.x]);
 
             var oldNode = new GraphNode(destNode.x, destNode.y);
             oldNode.d = dist[oldNode.y][oldNode.x];
@@ -98,12 +111,17 @@ public class Solution {
         }
     }
 
+    private static boolean notInBounds(int pos, int max) {
+        return pos < 0 || pos >= max;
+    }
+
     private static void parseLevelDescription(String levelDescription) {
         int index = 0;
         for (var c : levelDescription.toCharArray()) {
             String place = raceInfo.getDecodeMap().get(c);
             level[index / TaskConstants.LEVEL_HEIGHT][index % TaskConstants.LEVEL_WIDTH] =
                     raceInfo.getCostMap().get(currentRace).get(place);
+            index++;
         }
     }
 }
